@@ -55,15 +55,15 @@ public class GameBoard extends JFrame {
     private void renderSpecificFigures(Color innerColor,Color outlineColor,int startPositionX,int startPositionY,
                                        List<String>figures,Graphics g){
 
-        for (int counter=0;counter < figures.size(); counter++) {
+        for (String s : figures) {
             Figure figure;
-            String type=figures.get(counter);
+            String type = s;
 
-            if(type.equals("Guard")){
-                figure = new Guard(innerColor,outlineColor, startPositionX * GameField.FIELD_SIZE+30 , startPositionY);
+            if (type.equals("Guard")) {
+                figure = new Guard(innerColor, outlineColor, startPositionX * GameField.FIELD_SIZE + 30, startPositionY);
 
-            }else{
-                figure=new Leader(innerColor,outlineColor, startPositionX * GameField.FIELD_SIZE + 30, startPositionY);
+            } else {
+                figure = new Leader(innerColor, outlineColor, startPositionX * GameField.FIELD_SIZE + 30, startPositionY);
             }
 
             figure.render(g);

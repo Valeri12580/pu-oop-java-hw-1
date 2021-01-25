@@ -6,7 +6,7 @@ import java.awt.*;
 
 public class Guard extends Figure {
     public Guard(Color innerColor, Color outlineColor) {
-        super(innerColor, outlineColor);
+        super(innerColor, outlineColor,true);
     }
 
     @Override
@@ -36,6 +36,10 @@ public class Guard extends Figure {
 
     @Override
     public boolean isValidMove(int currentX, int currentY, int xDesired, int yDesired) {
+
+        if(!super.canMove){
+            return false;
+        }
         int resultX = Math.abs(currentX - xDesired);
         int resultY = Math.abs(currentY - yDesired);
 

@@ -7,7 +7,7 @@ import java.awt.*;
 public class Leader extends Figure {
 
     public Leader(Color innerColor, Color outlineColor) {
-        super(innerColor, outlineColor);
+        super(innerColor, outlineColor,true);
     }
 
     @Override
@@ -18,6 +18,10 @@ public class Leader extends Figure {
 
     @Override
     public boolean isValidMove(int currentX, int currentY, int xDesired, int yDesired) {
+
+        if(!super.canMove){
+            return false;
+        }
 
         int resultX = Math.abs(currentX - xDesired);
         int resultY = Math.abs(currentY - yDesired);
@@ -30,50 +34,57 @@ public class Leader extends Figure {
     public boolean move(int xDesired, int yDesired, GameField[][] gameFields) {
         int cycleX = xDesired - this.getX();
         int cycleY = yDesired - this.getY();
-
-        int lastFreePosition;
+        boolean isMoved;
 
         if (cycleX != 0) {
-
-            lastFreePosition = this.getX();
-            if (cycleX > 0) {
-
-                while (4 > lastFreePosition && gameFields[this.getY()][lastFreePosition + 1].getFigure() == null) {
-
-                    lastFreePosition++;
-
-                }
-            } else {
-                while (lastFreePosition > 0 && gameFields[this.getY()][lastFreePosition - 1].getFigure() == null) {
-                    lastFreePosition--;
-                }
-            }
-
-            this.setPosition(lastFreePosition, yDesired);
-            gameFields[yDesired][lastFreePosition].setFigure(this);
-            return lastFreePosition == this.getX();
+            isMoved = moveX(cycleX, yDesired, gameFields);
+            return isMoved;
         } else {
-            lastFreePosition = this.getY();
-
-            if (cycleY > 0) {
-
-                while (4 > lastFreePosition && gameFields[lastFreePosition + 1][this.getX()].getFigure() == null) {
-
-                    lastFreePosition++;
-
-                }
-            } else {
-                while (lastFreePosition > 0 && gameFields[lastFreePosition - 1][this.getX()].getFigure() == null) {
-                    lastFreePosition--;
-                }
-            }
-
-            this.setPosition(xDesired, lastFreePosition);
-            gameFields[lastFreePosition][xDesired].setFigure(this);
-            return lastFreePosition == this.getY();
-
+            isMoved = moveY(cycleY, xDesired, gameFields);
+            return isMoved;
         }
 
+    }
+
+    private boolean moveX(int cycleX, int yDesired, GameField[][] gameFields) {
+        int lastFreePosition = this.getX();
+        if (cycleX > 0) {
+            while (4 > lastFreePosition && gameFields[this.getY()][lastFreePosition + 1].getFigure() == null) {
+
+                lastFreePosition++;
+
+            }
+        } else {
+            while (lastFreePosition > 0 && gameFields[this.getY()][lastFreePosition - 1].getFigure() == null) {
+                lastFreePosition--;
+            }
+        }
+
+        this.setPosition(lastFreePosition, yDesired);
+        gameFields[yDesired][lastFreePosition].setFigure(this);
+        return lastFreePosition == this.getX();
+
+    }
+
+    private boolean moveY(int cycleY, int xDesired, GameField[][] gameFields) {
+        int lastFreePosition = this.getY();
+
+        if (cycleY > 0) {
+
+            while (4 > lastFreePosition && gameFields[lastFreePosition + 1][this.getX()].getFigure() == null) {
+
+                lastFreePosition++;
+
+            }
+        } else {
+            while (lastFreePosition > 0 && gameFields[lastFreePosition - 1][this.getX()].getFigure() == null) {
+                lastFreePosition--;
+            }
+        }
+
+        this.setPosition(xDesired, lastFreePosition);
+        gameFields[lastFreePosition][xDesired].setFigure(this);
+        return lastFreePosition == this.getY();
     }
 
     private void setPosition(int x, int y) {

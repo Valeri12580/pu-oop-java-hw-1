@@ -1,13 +1,12 @@
 package game;
 
-import figures.Figure;
-import figures.Guard;
-import figures.Leader;
+import figures.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.Random;
 
 public class GameBoard extends JFrame implements MouseListener {
 
@@ -20,19 +19,20 @@ public class GameBoard extends JFrame implements MouseListener {
     private final Figure[][] figures = {
             {new Guard(Color.YELLOW, Color.GREEN), new Guard(Color.YELLOW, Color.GREEN), new Guard(Color.YELLOW, Color.GREEN), new Guard(Color.YELLOW, Color.GREEN), new Leader(Color.YELLOW, Color.GREEN)},
             {null, null, null, null, null},
-            {null, null, new Guard(Color.GRAY, Color.GRAY), null, null},
+            {null, null, new Final(Color.GRAY, Color.GRAY), null, null},
             {null, null, null, null, null},
             {new Leader(Color.GREEN, Color.YELLOW), new Guard(Color.GREEN, Color.YELLOW), new Guard(Color.GREEN, Color.YELLOW), new Guard(Color.GREEN, Color.YELLOW), new Guard(Color.GREEN, Color.YELLOW)}
     };
 
-    private GameField[][] gameFields = new GameField[5][5];
+    private final GameField[][] gameFields = new GameField[5][5];
 
     private Figure selectedFigure = null;
 
 
     public GameBoard() throws HeadlessException {
         super("ГрогНок vs СитенПушан");
-        initWindows();
+        initWindow();
+        generateTurtles();
         initFields();
         super.addMouseListener(this);
 
@@ -42,26 +42,28 @@ public class GameBoard extends JFrame implements MouseListener {
     /*
     generate game window
      */
-    private void initWindows() {
+    private void initWindow() {
         super.setSize(500, 500);
         super.setVisible(true);
         super.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
-
     /*
-    render the game
+        Generate turtles
      */
-    @Override
-    public void paint(Graphics g) {
-        super.paint(g);
+    private void generateTurtles() {
+        Turtle[] turtles = {new Turtle(Color.WHITE, Color.RED), new Turtle(Color.WHITE, Color.RED)};
 
-        for (int row = 0; row < 5; row++) {
-            for (int col = 0; col < 5; col++) {
-                gameFields[row][col].render(g);
+        Random random = new Random();
+        for (Turtle turtle : turtles) {
+            int randomN = random.nextInt(5);
+
+            while (figures[2][randomN] != null) {
+                randomN = random.nextInt(5);
             }
-        }
 
+            this.figures[2][randomN] = turtle;
+        }
     }
 
     /*
@@ -83,6 +85,40 @@ public class GameBoard extends JFrame implements MouseListener {
         }
     }
 
+    /*
+    render the game
+    */
+    @Override
+    public void paint(Graphics g) {
+        super.paint(g);
+        for (int row = 0; row < 5; row++) {
+            for (int col = 0; col < 5; col++) {
+                gameFields[row][col].render(g);
+            }
+        }
+
+    }
+
+    /*
+   moving the figure
+    */
+    private void move(int bufferedFigureY, int bufferedFigureX, int desiredPositonY, int desiredPositionX) {
+        boolean isSuccessful = this.selectedFigure.move(desiredPositionX, desiredPositonY, this.gameFields);
+        if (isSuccessful) {
+            this.gameFields[bufferedFigureY][bufferedFigureX].setFigure(null);
+        }
+
+    }
+
+    /*
+    show the winner
+     */
+    private void showWinner(Color colorOfTheWinner) {
+        String msg = String.format("The winners are: %s frogs", colorOfTheWinner.equals(Color.YELLOW) ? "Yellow" : "Green");
+        JOptionPane.showMessageDialog(this, msg, "The winners are....", JOptionPane.INFORMATION_MESSAGE);
+
+    }
+
 
     /*
     event handler on mouse click
@@ -92,36 +128,39 @@ public class GameBoard extends JFrame implements MouseListener {
         int col = e.getX() / GameField.FIELD_SIZE;
         int row = e.getY() / GameField.FIELD_SIZE;
 
+        GameField chosenField = gameFields[row][col];
+
         if (selectedFigure == null) {
-            this.selectedFigure = gameFields[row][col].getFigure();
+            this.selectedFigure = chosenField.getFigure();
 
         } else {
 
             int selectedFigureX = selectedFigure.getX();
             int selectedFigureY = selectedFigure.getY();
 
-            if (selectedFigure.isValidMove(selectedFigureX, selectedFigureY, col, row) && gameFields[row][col].getFigure() == null) {
-                this.move(selectedFigureY, selectedFigureX, row, col);
-                super.repaint();
+            if (selectedFigure.isValidMove(selectedFigureX, selectedFigureY, col, row)) {
 
-            } else {
-                System.out.println("not valid");
+                if (chosenField.getFigure() == null) {
+                    this.move(selectedFigureY, selectedFigureX, row, col);
+                    super.repaint();
+
+                } else {
+                    if (chosenField.getFigure() instanceof Turtle) {
+                        chosenField.setFigure(null);
+                        gameFields[selectedFigureY][selectedFigureX].setFigure(null);
+                    } else if (chosenField.getFigure() instanceof Final && this.selectedFigure instanceof Leader) {
+                        this.showWinner(this.selectedFigure.getInnerColor());
+                        System.exit(0);
+                    }
+
+                    super.repaint();
+                }
+
             }
-
             selectedFigure = null;
         }
     }
 
-    /*
-    moving the figure
-     */
-    private void move(int bufferedFigureY, int bufferedFigureX, int desiredPositonY, int desiredPositionX) {
-        boolean isSuccessful = this.selectedFigure.move(desiredPositionX, desiredPositonY, this.gameFields);
-        if (isSuccessful) {
-            this.gameFields[bufferedFigureY][bufferedFigureX].setFigure(null);
-        }
-
-    }
 
     @Override
     public void mousePressed(MouseEvent e) {

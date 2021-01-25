@@ -10,13 +10,13 @@ public abstract class Figure {
     public static final int FIGURE_SIZE=40;
     protected int x;
     protected int y;
+    protected boolean canMove;
 
 
-    public Figure(Color innerColor, Color outlineColor) {
+    public Figure(Color innerColor, Color outlineColor,boolean canMove) {
         this.innerColor = innerColor;
         this.outlineColor = outlineColor;
-
-
+        this.canMove=canMove;
     }
 
     /*
@@ -50,5 +50,9 @@ public abstract class Figure {
 
     public int getY() {
         return y/GameField.FIELD_SIZE;
+    }
+
+    public Color getInnerColor() {
+        return innerColor;
     }
 }
